@@ -15,7 +15,7 @@ services:
     networks:
       - my-network-overlay
     deploy:
-      replicas: 1
+      replicas: 3
       resources:
         limits:
           cpus: "1.0"
@@ -64,7 +64,7 @@ services:
     environment:
       MONGO_URI: mongodb://mongodb:27017/nest
     deploy:
-      replicas: 1
+      replicas: 3
       resources:
         limits:
           cpus: "1.0"

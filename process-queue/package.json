@@ -71,7 +71,8 @@
       ".*\\.controller\\.ts$",
       ".*\\.model\\.ts$",
       ".*\\.entity\\.ts$",
-      ".*\\.dto\\.ts$"
+      ".*\\.dto\\.ts$",
+      ".*\\.schemas\\.ts$"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"

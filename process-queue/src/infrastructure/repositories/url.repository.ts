@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { UrlRepository } from 'src/core/ports/url-repository';
-import { Url } from 'src/core/domain/url';
+import { UrlRepository } from '../../core/ports/url-repository';
+import { Url } from '../../core/domain/url';
 import { UrlDocument } from '../schemas/url.schema';
 
 @Injectable()

@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # Servicio de MongoDB
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - app-network
+
+  # Servicio de la aplicación NestJS
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nestjs-app
+    ports:
+      - '3001:3000'
+    depends_on:
+      - mongodb
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/nest?authSource=admin
+    networks:
+      - app-network
+
+# Define las redes y volúmenes
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongo_data:

@@ -19,6 +19,7 @@ Este proyecto consta de dos servicios principales construidos con Node.js y Nest
 ### Diagrama de Componentes
 
 //////
+![Diagrama](./diagrama.png)
 
 ## Comandos para Levantar el Proyecto
 

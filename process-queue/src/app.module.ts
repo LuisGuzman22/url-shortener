@@ -6,7 +6,7 @@ import { UrlModule } from './infrastructure/controllers/url.module';
   imports: [
     MongooseModule.forRoot(
       process.env.MONGO_URI || 'mongodb://mongodb:27017/nest?authSource=admin',
-    ), // Cambia 'nest' al nombre de tu base de datos si es diferente
+    ),
     UrlModule,
   ],
 })

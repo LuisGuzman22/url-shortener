@@ -10,7 +10,7 @@ export let options = {
 };
 
 export default function () {
-  const url = "http://localhost:3001/url"; // Cambia a tu endpoint
+  const url = "http://localhost:3001/url";
   const payload = JSON.stringify({
     urlList: [
       "https://translate.google.com/?sl=es&tl=en&text=procesador&op=translate",

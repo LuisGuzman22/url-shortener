@@ -120,6 +120,6 @@ export class UrlProcessService {
   }
 
   private generateUrl(key: string): string {
-    return `http://localhost:3001/url/${key}`;
+    return `${process.env.BASE_URL}/url/${key}`;
   }
 }

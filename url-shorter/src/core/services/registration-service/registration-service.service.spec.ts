@@ -53,4 +53,79 @@ describe('RegistrationService', () => {
 
     expect(loggerSpy).toHaveBeenCalledWith('error on register url', error);
   });
+
+  it('should register a URL with optional parameters', async () => {
+    const data: RegisterUrl = {
+      shortUrl: 'short',
+      originalUrl: 'http://example.com',
+      action: 'create',
+    };
+    (axios.post as jest.Mock).mockResolvedValueOnce({ data: 'OK' });
+
+    await expect(service.registerUrl(data)).resolves.toBeUndefined();
+    expect(axios.post).toHaveBeenCalledWith(
+      `${process.env.PROCESS_QUEUE_URL}/url`,
+      data,
+    );
+  });
+
+  it('should log error when URL registration fails', async () => {
+    const data: RegisterUrl = {
+      shortUrl: 'short',
+      originalUrl: 'http://example.com',
+      action: 'create',
+    };
+    const error = new Error('Network error');
+    (axios.post as jest.Mock).mockRejectedValueOnce(error);
+
+    const loggerSpy = jest.spyOn(Logger.prototype, 'error');
+
+    await service.registerUrl(data);
+
+    expect(loggerSpy).toHaveBeenCalledWith('error on register url', error);
+  });
+
+  it('should register a URL with missing action field', async () => {
+    const data: RegisterUrl = {
+      shortUrl: 'short',
+      originalUrl: 'http://example.com',
+      action: 'create',
+    };
+    (axios.post as jest.Mock).mockResolvedValueOnce({ data: 'OK' });
+
+    await expect(service.registerUrl(data)).resolves.toBeUndefined();
+    expect(axios.post).toHaveBeenCalledWith(
+      `${process.env.PROCESS_QUEUE_URL}/url`,
+      data,
+    );
+  });
+
+  it('should fetch and return URL list successfully', async () => {
+    const mockResponse = {
+      data: {
+        data: [
+          {
+            id: '1',
+            shortUrl: 'short1',
+            originalUrl: 'http://example1.com',
+            action: 'create',
+          },
+          {
+            id: '2',
+            shortUrl: 'short2',
+            originalUrl: 'http://example2.com',
+            action: 'create',
+          },
+        ],
+      },
+    };
+    (axios.get as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+    const result = await service.getUrlList();
+
+    expect(result).toEqual(mockResponse.data.data);
+    expect(axios.get).toHaveBeenCalledWith(
+      `${process.env.PROCESS_QUEUE_URL}/url`,
+    );
+  });
 });

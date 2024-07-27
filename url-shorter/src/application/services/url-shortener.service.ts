@@ -8,43 +8,50 @@ import { CreateUrlDto } from '../dto/request/create-url.dto';
 import { CreateUrlResponseDto } from '../dto/response/create-url.response.dto';
 import { UrlProcessService } from './url-process.service';
 import { UrlResponseDto } from '../dto/response/url.response.dto';
+import { UuidGeneratorService } from './uuid-generator.service';
 
 @Injectable()
 export class UrlShortenerService {
   private readonly logger = new Logger(UrlShortenerService.name);
-
-  constructor(private readonly urlProcessService: UrlProcessService) {}
+  constructor(
+    private readonly urlProcessService: UrlProcessService,
+    private readonly uuidGeneratorService: UuidGeneratorService,
+  ) {}
 
   public async shortenUrl(
     createUrlDto: CreateUrlDto,
   ): Promise<CreateUrlResponseDto> {
-    this.logger.log('shortening url list');
+    const traceId = this.uuidGeneratorService.generateUUID();
+    this.logger.log(`[traceId=${traceId}] shortening url list`);
     if (!createUrlDto.urlList || createUrlDto.urlList.length === 0) {
-      this.logger.error('urlList is required');
+      this.logger.error(`[traceId=${traceId}] urlList is required`);
       throw new BadRequestException('urlList is required');
     }
 
-    return this.urlProcessService.shortener(createUrlDto.urlList);
+    return this.urlProcessService.shortener(createUrlDto.urlList, traceId);
   }
 
   public async getOriginalUrl(key: string, res: any): Promise<void> {
-    this.logger.log('restoring url');
-    const longUrl = await this.urlProcessService.restoreUrl(key);
+    const traceId = this.uuidGeneratorService.generateUUID();
+    this.logger.log(`[traceId=${traceId}] restoring url`);
+    const longUrl = await this.urlProcessService.restoreUrl(key, traceId);
 
     if (!longUrl) {
-      this.logger.error('key not found');
+      this.logger.error(`[traceId=${traceId}] key not found`);
       throw new NotFoundException('key not found');
     }
     res.redirect(longUrl);
   }
 
   public async deleteUrl(key: string): Promise<void> {
-    this.logger.log('deleting url');
-    await this.urlProcessService.deleteUrl(key);
+    const traceId = this.uuidGeneratorService.generateUUID();
+    this.logger.log(`[traceId=${traceId}] deleting url`);
+    await this.urlProcessService.deleteUrl(key, traceId);
   }
 
   public async masiveUpload(file: Express.Multer.File) {
-    this.logger.log('masive upload');
+    const traceId = this.uuidGeneratorService.generateUUID();
+    this.logger.log(`[traceId=${traceId}] masive upload`);
 
     const lines = file.buffer.toString().split('\n');
     const urlList = [];
@@ -57,12 +64,13 @@ export class UrlShortenerService {
       });
     });
 
-    return this.urlProcessService.shortener(urlList);
+    return this.urlProcessService.shortener(urlList, traceId);
   }
 
   public async getAllUrls(): Promise<UrlResponseDto> {
-    this.logger.log('get all url');
-    return this.urlProcessService.getAllUrl();
+    const traceId = this.uuidGeneratorService.generateUUID();
+    this.logger.log(`[traceId=${traceId}] get all url`);
+    return this.urlProcessService.getAllUrl(traceId);
   }
 
   private trimUrl(url: string): string {

@@ -25,21 +25,28 @@ export class UrlProcessService {
     private readonly registrationService: RegistrationService,
   ) {}
 
-  public async shortener(urlList: string[]): Promise<CreateUrlResponseDto> {
+  public async shortener(
+    urlList: string[],
+    traceId: string,
+  ): Promise<CreateUrlResponseDto> {
+    this.logger.log(`[traceId=${traceId}] shortening url list`);
     const shortList = await Promise.all(
-      urlList.map((url) => this.processUrl(url)),
+      urlList.map((url) => this.processUrl(url, traceId)),
     );
     return { shortList };
   }
 
-  private async processUrl(url: string): Promise<ShortUrl> {
+  private async processUrl(url: string, traceId: string): Promise<ShortUrl> {
     if (this.validateUrl(url)) {
-      const id = await this.mapUrlToId(url);
-      await this.registerUrl({
-        shortUrl: id,
-        originalUrl: url,
-        action: ACTION_CREATE,
-      });
+      const id = await this.mapUrlToId(url, traceId);
+      await this.registerUrl(
+        {
+          shortUrl: id,
+          originalUrl: url,
+          action: ACTION_CREATE,
+        },
+        traceId,
+      );
       return this.createUrlResponse(id, url);
     }
     return this.createInvalidUrlResponse(url);
@@ -59,28 +66,36 @@ export class UrlProcessService {
     };
   }
 
-  public async restoreUrl(key: string): Promise<string> {
-    const originalUrl = await this.cacheService.getValue(key);
-    await this.registerUrl({
-      shortUrl: this.generateUrl(key),
-      originalUrl: originalUrl,
-      action: ACTION_ACCESS,
-    });
+  public async restoreUrl(key: string, traceId: string): Promise<string> {
+    this.logger.log(`[traceId=${traceId}] restoring url`);
+    const originalUrl = await this.cacheService.getValue(key, traceId);
+    await this.registerUrl(
+      {
+        shortUrl: this.generateUrl(key),
+        originalUrl: originalUrl,
+        action: ACTION_ACCESS,
+      },
+      traceId,
+    );
     return originalUrl;
   }
 
-  public async deleteUrl(key: string): Promise<void> {
-    await this.registerUrl({
-      shortUrl: this.generateUrl(key),
-      originalUrl: key,
-      action: ACTION_DELETE,
-    });
-    await this.cacheService.deleteValue(key);
+  public async deleteUrl(key: string, traceId: string): Promise<void> {
+    this.logger.log(`[traceId=${traceId}] deleting url`);
+    await this.registerUrl(
+      {
+        shortUrl: this.generateUrl(key),
+        originalUrl: key,
+        action: ACTION_DELETE,
+      },
+      traceId,
+    );
+    await this.cacheService.deleteValue(key, traceId);
   }
 
-  public async getAllUrl(): Promise<UrlResponseDto> {
-    this.logger.debug('get all url');
-    return await this.registrationService.getUrlList();
+  public async getAllUrl(traceId: string): Promise<UrlResponseDto> {
+    this.logger.log(`[traceId=${traceId}] get all url`);
+    return await this.registrationService.getUrlList(traceId);
   }
 
   private validateUrl(url: string): boolean {
@@ -92,25 +107,32 @@ export class UrlProcessService {
     }
   }
 
-  private async registerUrl(registerData: {
-    shortUrl: string;
-    originalUrl?: string;
-    action: string;
-  }): Promise<void> {
-    await this.registrationService.registerUrl(registerData);
+  private async registerUrl(
+    registerData: {
+      shortUrl: string;
+      originalUrl?: string;
+      action: string;
+    },
+    traceId: string,
+  ): Promise<void> {
+    await this.registrationService.registerUrl(registerData, traceId);
   }
 
   private generateUUID(): string {
     return this.uuidGeneratorService.generateUUID();
   }
 
-  private async saveCache(key: string, value: string): Promise<boolean> {
-    return await this.cacheService.setValue(key, value);
+  private async saveCache(
+    key: string,
+    value: string,
+    traceId: string,
+  ): Promise<boolean> {
+    return await this.cacheService.setValue(key, value, traceId);
   }
 
-  private async mapUrlToId(url: string): Promise<string> {
+  private async mapUrlToId(url: string, traceId: string): Promise<string> {
     const id = this.generateUUID();
-    const registered = await this.saveCache(id, url);
+    const registered = await this.saveCache(id, url, traceId);
     if (registered) {
       return this.generateUrl(id);
     } else {

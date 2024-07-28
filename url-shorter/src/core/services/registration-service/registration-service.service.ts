@@ -12,7 +12,7 @@ export class RegistrationService {
     try {
       this.logger.log(`[traceId=${traceId}] register url`);
       const url = `${process.env.PROCESS_QUEUE_URL}/url`;
-      await axios.post(url, data);
+      await axios.post(url, data, { headers: { traceid: traceId } });
     } catch (error) {
       this.logger.error(
         `[traceId=${traceId}] [error=${error}] error on register url `,
@@ -24,7 +24,7 @@ export class RegistrationService {
     try {
       this.logger.log(`[traceId=${traceId}] get url list`);
       const url = `${process.env.PROCESS_QUEUE_URL}/url`;
-      const response = await axios.get(url);
+      const response = await axios.get(url, { headers: { traceid: traceId } });
       const data = response.data.data;
       return data;
     } catch (error) {

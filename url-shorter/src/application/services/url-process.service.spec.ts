@@ -11,6 +11,7 @@ describe('UrlProcessService', () => {
   let uuidGeneratorService: UuidGeneratorService;
   let cacheService: CacheService;
   let registrationService: RegistrationService;
+  const traceIdMock = 'traceId';
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -54,7 +55,7 @@ describe('UrlProcessService', () => {
         longUrl: 'https://example.com',
       } as ShortUrl);
 
-      const result = await service.shortener(urls);
+      const result = await service.shortener(urls, traceIdMock);
 
       expect(result).toEqual({
         shortList: [
@@ -74,7 +75,7 @@ describe('UrlProcessService', () => {
       jest.spyOn(service as any, 'mapUrlToId').mockResolvedValue('shortUrl');
       jest.spyOn(service as any, 'registerUrl').mockResolvedValue(null);
 
-      const result = await service['processUrl'](url);
+      const result = await service['processUrl'](url, traceIdMock);
 
       expect(result).toEqual({
         shortUrl: 'shortUrl',
@@ -86,7 +87,7 @@ describe('UrlProcessService', () => {
       const url = 'invalid-url';
       jest.spyOn(service as any, 'validateUrl').mockReturnValue(false);
 
-      const result = await service['processUrl'](url);
+      const result = await service['processUrl'](url, traceIdMock);
 
       expect(result).toEqual({
         shortUrl: INVALID_URL,
@@ -102,7 +103,7 @@ describe('UrlProcessService', () => {
       jest.spyOn(cacheService, 'getValue').mockResolvedValue(originalUrl);
       jest.spyOn(service as any, 'registerUrl').mockResolvedValue(null);
 
-      const result = await service.restoreUrl(key);
+      const result = await service.restoreUrl(key, traceIdMock);
 
       expect(result).toBe(originalUrl);
     });
@@ -116,9 +117,9 @@ describe('UrlProcessService', () => {
         .spyOn(cacheService, 'deleteValue')
         .mockResolvedValue(null);
 
-      await service.deleteUrl(key);
+      await service.deleteUrl(key, traceIdMock);
 
-      expect(deleteValueSpy).toHaveBeenCalledWith(key);
+      expect(deleteValueSpy).toHaveBeenCalledWith(key, traceIdMock);
     });
   });
 });

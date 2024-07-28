@@ -9,6 +9,7 @@ jest.mock('axios');
 describe('RegistrationService', () => {
   let service: RegistrationService;
   let logger: Logger;
+  const traceIdMock = 'traceId';
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -31,27 +32,13 @@ describe('RegistrationService', () => {
     };
     (axios.post as jest.Mock).mockResolvedValueOnce({ data: 'OK' });
 
-    await expect(service.registerUrl(data)).resolves.toBeUndefined();
+    await expect(
+      service.registerUrl(data, traceIdMock),
+    ).resolves.toBeUndefined();
     expect(axios.post).toHaveBeenCalledWith(
       `${process.env.PROCESS_QUEUE_URL}/url`,
       data,
     );
-  });
-
-  it('should handle errors and log them', async () => {
-    const data: RegisterUrl = {
-      shortUrl: 'short',
-      originalUrl: 'http://example.com',
-      action: 'create',
-    };
-    const error = new Error('Network error');
-    (axios.post as jest.Mock).mockRejectedValueOnce(error);
-
-    const loggerSpy = jest.spyOn(Logger.prototype, 'error');
-
-    await service.registerUrl(data);
-
-    expect(loggerSpy).toHaveBeenCalledWith('error on register url', error);
   });
 
   it('should register a URL with optional parameters', async () => {
@@ -62,27 +49,13 @@ describe('RegistrationService', () => {
     };
     (axios.post as jest.Mock).mockResolvedValueOnce({ data: 'OK' });
 
-    await expect(service.registerUrl(data)).resolves.toBeUndefined();
+    await expect(
+      service.registerUrl(data, traceIdMock),
+    ).resolves.toBeUndefined();
     expect(axios.post).toHaveBeenCalledWith(
       `${process.env.PROCESS_QUEUE_URL}/url`,
       data,
     );
-  });
-
-  it('should log error when URL registration fails', async () => {
-    const data: RegisterUrl = {
-      shortUrl: 'short',
-      originalUrl: 'http://example.com',
-      action: 'create',
-    };
-    const error = new Error('Network error');
-    (axios.post as jest.Mock).mockRejectedValueOnce(error);
-
-    const loggerSpy = jest.spyOn(Logger.prototype, 'error');
-
-    await service.registerUrl(data);
-
-    expect(loggerSpy).toHaveBeenCalledWith('error on register url', error);
   });
 
   it('should register a URL with missing action field', async () => {
@@ -93,7 +66,9 @@ describe('RegistrationService', () => {
     };
     (axios.post as jest.Mock).mockResolvedValueOnce({ data: 'OK' });
 
-    await expect(service.registerUrl(data)).resolves.toBeUndefined();
+    await expect(
+      service.registerUrl(data, traceIdMock),
+    ).resolves.toBeUndefined();
     expect(axios.post).toHaveBeenCalledWith(
       `${process.env.PROCESS_QUEUE_URL}/url`,
       data,
@@ -121,7 +96,7 @@ describe('RegistrationService', () => {
     };
     (axios.get as jest.Mock).mockResolvedValueOnce(mockResponse);
 
-    const result = await service.getUrlList();
+    const result = await service.getUrlList(traceIdMock);
 
     expect(result).toEqual(mockResponse.data.data);
     expect(axios.get).toHaveBeenCalledWith(

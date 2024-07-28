@@ -5,7 +5,6 @@ import { UuidGeneratorService } from './uuid-generator.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { CreateUrlDto } from '../dto/request/create-url.dto';
 import { CreateUrlResponseDto } from '../dto/response/create-url.response.dto';
-import { Logger } from '@nestjs/common';
 import { UrlResponseDto } from '../dto/response/url.response.dto';
 
 jest.mock('./url-process.service');

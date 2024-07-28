@@ -13,7 +13,8 @@ export class UrlRepositoryImpl implements UrlRepository {
     @InjectModel('Url') private readonly urlModel: Model<UrlDocument>,
   ) {}
 
-  public async save(url: Url): Promise<Url> {
+  public async save(url: Url, traceId: string): Promise<Url> {
+    this.logger.log(`[traceId=${traceId}] Creating new url`);
     const createdUrl = new this.urlModel(url);
     const result = await createdUrl.save();
     return new Url(
@@ -24,9 +25,9 @@ export class UrlRepositoryImpl implements UrlRepository {
     );
   }
 
-  public async findAll(): Promise<Url[]> {
+  public async findAll(traceId: string): Promise<Url[]> {
+    this.logger.log(`[traceId=${traceId}] Getting all urls`);
     const urls = await this.urlModel.find().exec();
-    this.logger.log(urls);
     return urls.map(
       (url) => new Url(url.id, url.shortUrl, url.originalUrl, url.action),
     );

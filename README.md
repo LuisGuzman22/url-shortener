@@ -31,6 +31,15 @@ Este proyecto consta de dos servicios principales construidos con Node.js y Nest
 - Docker y Docker Compose instalados en tu máquina.
 - Configuración del entorno Swarm para Docker.
 
+### Versiones recomendadas
+
+- Docker = Docker version 27.0.3, build 7d4bcd8
+- Docker compose = Docker Compose version v2.28.1-desktop.1
+- Node = v16.16.0
+- npm = 8.11.0
+- redis-cli = redis-cli 7.2.5
+- Mongo = MongoDB shell version v5.0.28
+
 ### Levantar el Sistema
 
 1. **Realizar build de los proyectos**
